@@ -26,6 +26,8 @@ use std::fmt::Display;
 use antlr4rust::{Parser as AntlrParser};
 use antlr4rust::tree::*;
 use antlr4rust::trees::*;
+use antlr4rust::int_stream::IntStream;
+use antlr4rust::token_stream::TokenStream;
 
 /*
         if self.tee {
@@ -71,7 +73,20 @@ fn parse_input(
 	// no lexer.reset();
     }
 
-    let token_stream = CommonTokenStream::new(lexer);
+    let mut token_stream = CommonTokenStream::new(lexer);
+//    token_stream.fill(); *** UNAVAILABLE ***
+    let mut j: isize = 1;
+    loop {
+	let mut token = token_stream.lt(j).unwrap();
+	token.set_token_index(j);
+	j = j + 1;
+	eprintln!("{}", token.to_string());
+	let token_type = token.get_token_type();
+	if token_type == -1 {
+		break;
+	}
+    }
+
     let mut parser = CParser::new(token_stream);
     parser.remove_error_listeners();
     let pec = Rc::new(RefCell::new(0));
